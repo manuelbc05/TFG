@@ -8,4 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="colorBottomNavItem">#FF6200EE</color> <!-- Color Custom -->
+    <color name="colorBottomNavItemDesgraciado">#E6A8FF</color> <!-- Color Custom Desgraciado -->
+
 </resources>

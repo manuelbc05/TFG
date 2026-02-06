@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,15 +13,15 @@
         android:layout_gravity="top" />
 
     <!-- Barra de navegación inferior -->
-    <!-- Colorinchis personalizado que le vamos a poner para mantener una uniformidad -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
-        app:itemIconTint="@color/colorBottomNavItem"
+        android:background="@drawable/bottom_nav_rounded_border"
+        android:elevation="8dp"
+        app:itemIconTint="@color/bottom_nav_icon_color"
         app:itemTextColor="@color/colorBottomNavItem"
         app:menu="@menu/bottom_nav_menu" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

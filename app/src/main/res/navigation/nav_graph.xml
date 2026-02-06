@@ -25,6 +25,11 @@
         android:name="com.example.tfg.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/feedFragment"
+        android:name="com.example.tfg.FeedFragment"
+        android:label="fragment_feed"
+        tools:layout="@layout/fragment_feed" />
 
 
 </navigation>

@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.discover -> fragment = SearchFragment()
                 R.id.feed -> fragment = FeedFragment()
                 R.id.nav_home -> fragment = HomeFragment()
-                R.id.nav_search -> fragment = SearchFragment()
                 R.id.nav_profile -> fragment = ProfileFragment()
             }
 
