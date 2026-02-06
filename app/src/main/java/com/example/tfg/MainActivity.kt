@@ -1,41 +1,40 @@
 package com.example.tfg
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import com.example.tfg.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
-        setSupportActionBar(binding.toolbar)
+        // Manejo de navegación con BottomNavigationView
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            var fragment: Fragment? = null
+            when (item.itemId) {
+                R.id.nav_home -> fragment = HomeFragment()
+                R.id.nav_search -> fragment = SearchFragment()
+                R.id.nav_profile -> fragment = ProfileFragment()
+            }
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+            if (fragment != null) {
+                // Reemplazar el fragmento en el FrameLayout
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .commit()
+            }
+            true
         }
-    }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+        // Cargar el fragmento inicial
+        if (savedInstanceState == null) {
+            bottomNavigationView.selectedItemId = R.id.nav_home
+        }
     }
 }
