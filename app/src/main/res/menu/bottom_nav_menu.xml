@@ -6,9 +6,14 @@
         android:title="Descubrir"/>
 
     <item
-        android:id="@+id/nav_search"
-        android:icon="@drawable/search"
-        android:title="Buscar" />
+        android:id="@+id/feed"
+        android:icon="@drawable/feed"
+        android:title="Feed" />
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home"
+        android:title="Inicio" />
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/profile"
