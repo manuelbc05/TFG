@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "511230996617",
+    "project_id": "tfg-dam-e4625",
+    "storage_bucket": "tfg-dam-e4625.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511230996617:android:2faa76e7bb64ce39511658",
+        "android_client_info": {
+          "package_name": "com.example.tfg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjo8HgHiSSVq_Arx35S2rWShemkzhLtl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
