@@ -47,20 +47,25 @@ class ProfileFragment : Fragment() {
         }
 
         // Configura el botón de "login" (iniciar sesión)
-        binding.loginButton.setOnClickListener {
+        binding.registerButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()  // Obtiene el email ingresado
             val password = binding.passwordEditText.text.toString()  // Obtiene la contraseña ingresada
 
-            // Llama a Firebase para autenticar al usuario con el email y la contraseña
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->  // Escucha si la tarea fue exitosa o no
-                    if (task.isSuccessful) {  // Si la tarea fue exitosa (login exitoso)
-                        val user = auth.currentUser  // Obtiene el usuario actual autenticado
-                        Toast.makeText(context, "Bienvenido ${user?.email}", Toast.LENGTH_SHORT).show()  // Muestra un mensaje de bienvenida
-                    } else {  // Si hubo un error en el login
-                        Toast.makeText(context, "Error en el login: ${task.exception?.message}", Toast.LENGTH_SHORT).show()  // Muestra un mensaje de error
+            // Validación de campos vacíos
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(context, "Por favor, ingresa ambos campos.", Toast.LENGTH_SHORT).show()
+            } else {
+                // Llama a Firebase para crear un nuevo usuario con email y contraseña
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->  // Escucha si la tarea fue exitosa o no
+                        if (task.isSuccessful) {  // Si la tarea fue exitosa (registro exitoso)
+                            val user = auth.currentUser  // Obtiene el usuario actual autenticado
+                            Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()  // Muestra un mensaje de éxito
+                        } else {  // Si hubo un error en el registro
+                            Toast.makeText(context, "Error en el registro: ${task.exception?.message}", Toast.LENGTH_SHORT).show()  // Muestra un mensaje de error
+                        }
                     }
-                }
+            }
         }
     }
 }
