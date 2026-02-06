@@ -42,6 +42,8 @@ android {
 }
 
 dependencies {
+
+    // FIRE BASE
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
     // Add the dependency for the Firebase SDK for Google Analytics
@@ -50,6 +52,8 @@ dependencies {
     // For example, add the dependencies for Firebase Authentication and Cloud Firestore
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
