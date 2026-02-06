@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFFFFF"/> <!-- Fondo blanco o el color que prefieras -->
+    <solid android:color="#FFFFFF"/> <!-- Fondo blanco o el color que prefieras (Gris no es mala idea)-->
     <corners android:radius="40dp"/> <!-- Bordes redondeados -->
     <stroke android:color="@color/white" android:width="1dp"/> <!-- Borde del BottomNavigationView -->
 </shape>
