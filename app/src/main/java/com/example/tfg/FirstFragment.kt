@@ -12,7 +12,7 @@ import com.example.tfg.databinding.FragmentFirstBinding
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class FirstFragment : Fragment() {
-
+dwada
     private var _binding: FragmentFirstBinding? = null
 
     // This property is only valid between onCreateView and
