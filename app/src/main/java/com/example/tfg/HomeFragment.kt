@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
         Log.d("WebView", "Cargando URL: file:///android_asset/map.html")
 
         // Cargar el archivo HTML desde assets
-        webView.loadUrl("app/src/main/assets/map.html")
+        webView.loadUrl("file:///android_asset/map.html")
 
         // Log de verificación de carga
         Log.d("WebView", "Archivo map.html cargado en WebView")
