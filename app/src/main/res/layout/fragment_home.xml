@@ -7,11 +7,31 @@
     android:background="@android:color/black"
     tools:context=".HomeFragment">
 
-    <!-- WebView para mostrar el mapa de Leaflet -->
-<WebView
-android:id="@+id/webview"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="@android:color/white"
-    />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"/>
+
+<!--    Utilizo FloatingActionButton que es un concepto nuevo, ya que he realizado
+        una tareilla de investigación primeramente sobre el Material Design de IOS
+        primeramente por un proyecto personal, pero Google También tiene su propio
+        material design, yo iba a poner un button normal y corriente, pero el floating
+        action button se utiliza para mostrar la acción principal de una pantalla, en mi
+        caso lo será ya que será el "tocame" de la aplicación
+
+-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="90dp"
+        android:contentDescription="Action"
+        android:src="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@color/colorBottomNavItem"
+        app:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
