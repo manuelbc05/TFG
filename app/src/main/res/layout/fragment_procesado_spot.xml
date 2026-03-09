@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@android:color/white">
+
+    <!-- Previsualización de la imagen seleccionada o tomada -->
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:background="@android:color/darker_gray"/>
+
+    <!-- Botón para abrir galería -->
+    <Button
+        android:id="@+id/btnGallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Seleccionar de galería"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Botón para abrir cámara -->
+    <Button
+        android:id="@+id/btnCamera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tomar foto"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>
