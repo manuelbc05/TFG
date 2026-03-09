@@ -18,5 +18,6 @@
         android:background="@drawable/estilobotonspot"
 <!--        Background titn a null porque si no se ralla completamente y aparece blanco-->
         app:backgroundTint="@null"/>
+    <!--        Background titn a null porque si no se ralla completamente y aparece blanco-->
 
 </LinearLayout>
