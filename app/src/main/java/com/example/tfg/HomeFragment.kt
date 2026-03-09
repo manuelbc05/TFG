@@ -32,6 +32,12 @@ class HomeFragment : Fragment() {
         webView.webViewClient = WebViewClient()
         webView.loadUrl("file:///android_asset/map.html")
 
+        binding.btnAction.setOnClickListener {
+            val bottomSheet = UploadSpotBottomSheet()
+            bottomSheet.show(parentFragmentManager, "UploadSpot")
+
+        }
+
         return binding.root
     }
 }
