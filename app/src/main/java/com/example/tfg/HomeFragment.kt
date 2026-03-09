@@ -20,7 +20,7 @@ class HomeFragment : Fragment() {
         val binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         // Configura el WebView
-        val webView = binding.root.findViewById<WebView>(R.id.webview)
+        val webView = binding.webview
         webView.settings.javaScriptEnabled = true // Habilitar JavaScript
         webView.settings.domStorageEnabled = true // Habilitar almacenamiento local
         webView.settings.setSupportZoom(true) // Habilitar zoom
