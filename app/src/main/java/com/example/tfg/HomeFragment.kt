@@ -19,9 +19,16 @@ class HomeFragment : Fragment() {
         val binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         val webView = binding.webview
+
+        // Necesario habilitar JavaScript porque el html que vamos a cagar contiene también htrml
+        // y si no pues no funciona
+
         webView.settings.javaScriptEnabled = true
+
+        // Habilitado para guardar datos localmente en el navegador y funcionar correctamente
         webView.settings.domStorageEnabled = true
 
+        // Le decimos al webView que cargue los enlaces del webView
         webView.webViewClient = WebViewClient()
         webView.loadUrl("file:///android_asset/map.html")
 
