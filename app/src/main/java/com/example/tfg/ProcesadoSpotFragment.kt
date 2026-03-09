@@ -50,6 +50,11 @@ class ProcesadoSpotFragment : Fragment() {
             pickImageLauncher.launch(intent)
         }
 
+        binding.btnBack.setOnClickListener {
+            // Esto hará que el fragment vuelva al anterior en el back stack
+            parentFragmentManager.popBackStack()
+        }
+
         return binding.root
     }
 

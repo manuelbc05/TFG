@@ -6,7 +6,6 @@
     android:padding="20dp"
     android:background="@android:color/white">
 
-    <!-- Previsualización de la imagen seleccionada o tomada -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
@@ -15,7 +14,6 @@
         android:scaleType="centerCrop"
         android:background="@android:color/darker_gray"/>
 
-    <!-- Botón para abrir galería -->
     <Button
         android:id="@+id/btnGallery"
         android:layout_width="match_parent"
@@ -23,11 +21,18 @@
         android:text="Seleccionar de galería"
         android:layout_marginTop="16dp"/>
 
-    <!-- Botón para abrir cámara -->
     <Button
         android:id="@+id/btnCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Tomar foto"
         android:layout_marginTop="8dp"/>
+
+    <!-- Botón para volver atrás -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Volver atrás"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
