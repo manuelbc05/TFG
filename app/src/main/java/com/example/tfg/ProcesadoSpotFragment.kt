@@ -81,21 +81,6 @@ class ProcesadoSpotFragment : Fragment() {
             pickImageLauncher.launch(intent)
         }
 
-        binding.btnSubmitSpot.setOnClickListener {
-
-            if (imageUris.size > 4) {
-                Toast.makeText(requireContext(), "No puedes subir más de 4 fotos", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (imageUris.isEmpty()) {
-                Toast.makeText(requireContext(), "Añade al menos una foto", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            Toast.makeText(requireContext(), "Spot enviado correctamente", Toast.LENGTH_SHORT).show()
-        }
-
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -142,6 +127,10 @@ class ProcesadoSpotFragment : Fragment() {
 
         imageUris.add(image)
         currentPhotoSlot++
+
+        if (imageUris.isNotEmpty()) {
+            binding.btnNext.visibility = View.VISIBLE
+        }
     }
 
     override fun onDestroyView() {

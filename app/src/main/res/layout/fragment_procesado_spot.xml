@@ -82,11 +82,13 @@
             android:text="Tomar foto" />
 
         <Button
-            android:id="@+id/btnSubmitSpot"
-            android:layout_width="match_parent"
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end"
             android:layout_marginTop="20dp"
-            android:text="Subir Spot" />
+            android:text="Siguiente"
+            android:visibility="gone" />
 
     </LinearLayout>
 
