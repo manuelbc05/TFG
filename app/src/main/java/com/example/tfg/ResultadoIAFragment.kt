@@ -33,7 +33,10 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
     private var datoDetectado = ""
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance(
+        FirebaseFirestore.getInstance().app,
+        "tfg-base-datos"
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

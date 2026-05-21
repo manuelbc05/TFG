@@ -1,6 +1,5 @@
 package com.example.tfg
 
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
@@ -15,14 +14,17 @@ import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private lateinit var binding: FragmentProfileBinding
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+
+    private val db = FirebaseFirestore.getInstance(
+        FirebaseFirestore.getInstance().app,
+        "tfg-base-datos"
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,7 +43,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         binding.logoutButton.setOnClickListener {
             auth.signOut()
-            Toast.makeText(context, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
             actualizarVistaUsuario()
         }
     }
@@ -51,6 +53,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         if (currentUser != null) {
             binding.profileTextView.text = "Tu perfil: ${currentUser.email}"
+
             binding.logoutButton.visibility = View.VISIBLE
             binding.loginButton.visibility = View.GONE
             binding.registerButton.visibility = View.GONE
@@ -64,6 +67,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         } else {
             binding.profileTextView.text = "No has iniciado sesión"
+
             binding.logoutButton.visibility = View.GONE
             binding.loginButton.visibility = View.VISIBLE
             binding.registerButton.visibility = View.VISIBLE
@@ -77,46 +81,40 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun registrarUsuario() {
-        val email = binding.emailEditText.text.toString()
-        val password = binding.passwordEditText.text.toString()
+        val email = binding.emailEditText.text.toString().trim()
+        val password = binding.passwordEditText.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(context, "Por favor, ingresa ambos campos.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Por favor, ingresa ambos campos", Toast.LENGTH_SHORT).show()
             return
         }
 
         auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                    actualizarVistaUsuario()
-                } else {
-                    Toast.makeText(context, "Error en el registro: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Registro exitoso", Toast.LENGTH_SHORT).show()
+                actualizarVistaUsuario()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
     private fun iniciarSesion() {
-        val email = binding.emailEditText.text.toString()
-        val password = binding.passwordEditText.text.toString()
+        val email = binding.emailEditText.text.toString().trim()
+        val password = binding.passwordEditText.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(context, "Por favor, ingresa ambos campos.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Por favor, ingresa ambos campos", Toast.LENGTH_SHORT).show()
             return
         }
 
         auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Bienvenido ${auth.currentUser?.email}", Toast.LENGTH_SHORT).show()
-                    actualizarVistaUsuario()
-
-                    val intent = Intent(context, MainActivity::class.java)
-                    startActivity(intent)
-
-                } else {
-                    Toast.makeText(context, "Error en el login: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Bienvenido ${auth.currentUser?.email}", Toast.LENGTH_SHORT).show()
+                actualizarVistaUsuario()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
@@ -124,19 +122,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val user = auth.currentUser ?: return
 
         binding.postsGrid.removeAllViews()
+        binding.postsTitle.text = "Publicaciones"
 
         db.collection("spots")
             .whereEqualTo("userId", user.uid)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
 
                 binding.postsGrid.removeAllViews()
-
-                if (documents.isEmpty) {
-                    binding.postsTitle.text = "Publicaciones"
-                    return@addOnSuccessListener
-                }
 
                 binding.postsTitle.text = "Publicaciones (${documents.size()})"
 
@@ -157,7 +150,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error cargando publicaciones: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error cargando publicaciones: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
     }
 
@@ -175,15 +172,17 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         card.gravity = Gravity.CENTER
         card.setPadding(6, 6, 6, 6)
 
+        val size = resources.displayMetrics.widthPixels / 3
+
         val cardParams = GridLayout.LayoutParams()
-        cardParams.width = resources.displayMetrics.widthPixels / 3
+        cardParams.width = size
         cardParams.height = GridLayout.LayoutParams.WRAP_CONTENT
         card.layoutParams = cardParams
 
         val imageView = ImageView(context)
         imageView.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            resources.displayMetrics.widthPixels / 3
+            size
         )
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
@@ -199,11 +198,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             imageView.setImageResource(R.drawable.cochedesconocido)
         }
 
-        val title = TextView(context)
-        title.text = "$marca $modelo"
-        title.textSize = 12f
-        title.gravity = Gravity.CENTER
-        title.maxLines = 1
+        val titulo = TextView(context)
+        titulo.text = "$marca $modelo"
+        titulo.textSize = 12f
+        titulo.gravity = Gravity.CENTER
+        titulo.maxLines = 1
 
         val year = TextView(context)
         year.text = anio
@@ -212,7 +211,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         year.maxLines = 1
 
         card.addView(imageView)
-        card.addView(title)
+        card.addView(titulo)
         card.addView(year)
 
         card.setOnClickListener {
