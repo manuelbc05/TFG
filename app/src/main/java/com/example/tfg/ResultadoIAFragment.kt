@@ -22,6 +22,11 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
     private var posicionActual = 0
     private val imagenes = SpotImageStorage.imagenes
 
+    private var marcaDetectada = ""
+    private var modeloDetectado = ""
+    private var anioDetectado = ""
+    private var datoDetectado = ""
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -34,13 +39,13 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
         }
 
         mostrarImagenActual()
-        analizarImagenActual()
+        analizarSoloPrimeraImagen()
 
         binding.btnPrev.setOnClickListener {
             if (posicionActual > 0) {
                 posicionActual--
                 mostrarImagenActual()
-                analizarImagenActual()
+                mostrarResultadoGuardado()
             }
         }
 
@@ -48,7 +53,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
             if (posicionActual < imagenes.size - 1) {
                 posicionActual++
                 mostrarImagenActual()
-                analizarImagenActual()
+                mostrarResultadoGuardado()
             }
         }
 
@@ -70,7 +75,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
             if (posicionActual == imagenes.size - 1) View.INVISIBLE else View.VISIBLE
     }
 
-    private fun analizarImagenActual() {
+    private fun analizarSoloPrimeraImagen() {
         binding.txtMarca.text = "Analizando..."
         binding.txtModelo.text = "Analizando..."
         binding.txtAnio.text = "Analizando..."
@@ -78,7 +83,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val bitmap = convertirABitmap(imagenes[posicionActual])
+                val bitmap = convertirABitmap(imagenes[0])
 
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-3.5-flash",
@@ -108,18 +113,49 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                 val texto = response.text ?: "No detectado"
 
                 withContext(Dispatchers.Main) {
-                    pintarResultado(texto)
+                    guardarResultado(texto)
+                    mostrarResultadoGuardado()
                 }
 
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.txtMarca.text = "Error"
-                    binding.txtModelo.text = "Error"
-                    binding.txtAnio.text = "Error"
-                    binding.txtDato.text = e.message ?: "Error al analizar la imagen"
+                    marcaDetectada = "Error"
+                    modeloDetectado = "Error"
+                    anioDetectado = "Error"
+                    datoDetectado = e.message ?: "Error al analizar la imagen"
+
+                    mostrarResultadoGuardado()
                 }
             }
         }
+    }
+
+    private fun guardarResultado(texto: String) {
+        marcaDetectada = texto.substringAfter("Marca:", "No detectado")
+            .substringBefore("Modelo:")
+            .trim()
+            .ifEmpty { "No detectado" }
+
+        modeloDetectado = texto.substringAfter("Modelo:", "No detectado")
+            .substringBefore("Año:")
+            .trim()
+            .ifEmpty { "No detectado" }
+
+        anioDetectado = texto.substringAfter("Año:", "No detectado")
+            .substringBefore("Dato:")
+            .trim()
+            .ifEmpty { "No detectado" }
+
+        datoDetectado = texto.substringAfter("Dato:", texto)
+            .trim()
+            .ifEmpty { texto }
+    }
+
+    private fun mostrarResultadoGuardado() {
+        binding.txtMarca.text = marcaDetectada
+        binding.txtModelo.text = modeloDetectado
+        binding.txtAnio.text = anioDetectado
+        binding.txtDato.text = datoDetectado
     }
 
     private fun convertirABitmap(imagen: Any): Bitmap {
@@ -135,27 +171,5 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                 BitmapFactory.decodeResource(resources, R.drawable.cochedesconocido)
             }
         }
-    }
-
-    private fun pintarResultado(texto: String) {
-        val marca = texto.substringAfter("Marca:", "No detectado")
-            .substringBefore("Modelo:")
-            .trim()
-
-        val modelo = texto.substringAfter("Modelo:", "No detectado")
-            .substringBefore("Año:")
-            .trim()
-
-        val anio = texto.substringAfter("Año:", "No detectado")
-            .substringBefore("Dato:")
-            .trim()
-
-        val dato = texto.substringAfter("Dato:", texto)
-            .trim()
-
-        binding.txtMarca.text = marca.ifEmpty { "No detectado" }
-        binding.txtModelo.text = modelo.ifEmpty { "No detectado" }
-        binding.txtAnio.text = anio.ifEmpty { "No detectado" }
-        binding.txtDato.text = dato.ifEmpty { texto }
     }
 }
