@@ -54,6 +54,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
 
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
+
+    // Gemini API
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
