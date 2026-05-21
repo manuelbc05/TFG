@@ -17,10 +17,8 @@ class UploadSpotBottomSheet : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflamos el layout con ViewBinding
         _binding = BottomSheetSpotBinding.inflate(inflater, container, false)
 
-        // Aquí va tu listener para abrir ProcesadoSpotFragment
         binding.btnUploadSpot.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.frameLayout, ProcesadoSpotFragment())
