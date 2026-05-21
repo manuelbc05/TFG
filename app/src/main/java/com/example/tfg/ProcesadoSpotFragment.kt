@@ -6,59 +6,55 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentProcesadoSpotBinding
 
-class ProcesadoSpotFragment : Fragment() {
+class ProcesadoSpotFragment : Fragment(R.layout.fragment_procesado_spot) {
 
-    private var _binding: FragmentProcesadoSpotBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentProcesadoSpotBinding
 
-    private var currentPhotoSlot = 0
+    private val imagenes = mutableListOf<Any>()
+    private var posicionActual = 0
 
-    private val imageUris = mutableListOf<Any>()
-
-    private val pickImageLauncher = registerForActivityResult(
+    private val launcherImagen = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
 
         if (result.resultCode == Activity.RESULT_OK) {
 
-            if (imageUris.size >= 4) {
-                Toast.makeText(requireContext(), "Solo puedes subir 4 fotos", Toast.LENGTH_SHORT).show()
+            if (imagenes.size >= 4) {
+                Toast.makeText(requireContext(), "Máximo 4 fotos", Toast.LENGTH_SHORT).show()
                 return@registerForActivityResult
             }
 
-            val imageUri: Uri? = result.data?.data
+            val uri: Uri? = result.data?.data
 
-            if (imageUri != null) {
-                addImageToSlot(imageUri)
+            if (uri != null) {
+                añadirImagen(uri)
             } else {
                 val bitmap = result.data?.extras?.get("data") as? Bitmap
 
                 if (bitmap != null) {
-                    addImageToSlot(bitmap)
+                    añadirImagen(bitmap)
                 }
             }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        _binding = FragmentProcesadoSpotBinding.inflate(inflater, container, false)
+        binding = FragmentProcesadoSpotBinding.bind(view)
+
+        binding.btnNext.visibility = View.GONE
 
         binding.btnGallery.setOnClickListener {
 
-            if (imageUris.size >= 4) {
+            if (imagenes.size >= 4) {
                 Toast.makeText(requireContext(), "Máximo 4 fotos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -67,74 +63,55 @@ class ProcesadoSpotFragment : Fragment() {
                 type = "image/*"
             }
 
-            pickImageLauncher.launch(intent)
+            launcherImagen.launch(intent)
         }
 
         binding.btnCamera.setOnClickListener {
 
-            if (imageUris.size >= 4) {
+            if (imagenes.size >= 4) {
                 Toast.makeText(requireContext(), "Máximo 4 fotos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            pickImageLauncher.launch(intent)
+            launcherImagen.launch(intent)
+        }
+
+        binding.btnNext.setOnClickListener {
+
+            SpotImageStorage.imagenes.clear()
+            SpotImageStorage.imagenes.addAll(imagenes)
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frameLayout, ResultadoIAFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
-        return binding.root
     }
 
-    private fun addImageToSlot(image: Any) {
+    private fun añadirImagen(imagen: Any) {
 
-        when (currentPhotoSlot) {
-
-            0 -> {
-                if (image is Uri) {
-                    binding.imageView1.setImageURI(image)
-                } else {
-                    binding.imageView1.setImageBitmap(image as Bitmap)
-                }
-            }
-
-            1 -> {
-                if (image is Uri) {
-                    binding.imageView2.setImageURI(image)
-                } else {
-                    binding.imageView2.setImageBitmap(image as Bitmap)
-                }
-            }
-
-            2 -> {
-                if (image is Uri) {
-                    binding.imageView3.setImageURI(image)
-                } else {
-                    binding.imageView3.setImageBitmap(image as Bitmap)
-                }
-            }
-
-            3 -> {
-                if (image is Uri) {
-                    binding.imageView4.setImageURI(image)
-                } else {
-                    binding.imageView4.setImageBitmap(image as Bitmap)
-                }
-            }
+        when (posicionActual) {
+            0 -> mostrarImagen(binding.imageView1, imagen)
+            1 -> mostrarImagen(binding.imageView2, imagen)
+            2 -> mostrarImagen(binding.imageView3, imagen)
+            3 -> mostrarImagen(binding.imageView4, imagen)
         }
 
-        imageUris.add(image)
-        currentPhotoSlot++
+        imagenes.add(imagen)
+        posicionActual++
 
-        if (imageUris.isNotEmpty()) {
-            binding.btnNext.visibility = View.VISIBLE
-        }
+        binding.btnNext.visibility = View.VISIBLE
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun mostrarImagen(imageView: ImageView, imagen: Any) {
+        when (imagen) {
+            is Uri -> imageView.setImageURI(imagen)
+            is Bitmap -> imageView.setImageBitmap(imagen)
+        }
     }
 }
