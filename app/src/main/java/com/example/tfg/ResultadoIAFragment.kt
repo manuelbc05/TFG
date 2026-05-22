@@ -319,8 +319,15 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val bitmap = convertirABitmap(imagenes[0])
-                val imageBase64 = bitmapToBase64(bitmap)
+                val imagenesBase64 = mutableListOf<String>()
+
+                for (imagen in imagenes) {
+                    val bitmap = convertirABitmap(imagen)
+                    val base64 = bitmapToBase64(bitmap)
+                    imagenesBase64.add(base64)
+                }
+
+                val imagenPrincipal = imagenesBase64.firstOrNull().orEmpty()
 
                 val spot = hashMapOf(
                     "userId" to user.uid,
@@ -330,7 +337,8 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                     "modelo" to modeloDetectado,
                     "anio" to anioDetectado,
                     "dato" to datoDetectado,
-                    "imageBase64" to imageBase64,
+                    "imageBase64" to imagenPrincipal,
+                    "imagenesBase64" to imagenesBase64,
                     "latitud" to latitud,
                     "longitud" to longitud,
                     "createdAt" to FieldValue.serverTimestamp()
