@@ -75,6 +75,19 @@ class HomeFragment : Fragment() {
         cargarSpotsEnMapa()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        try {
+            binding.webview.stopLoading()
+            binding.webview.loadUrl("about:blank")
+            binding.webview.clearHistory()
+            binding.webview.removeAllViews()
+            binding.webview.destroy()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     private fun cargarSpotsEnMapa() {
         db.collection("spots")
             .get()
