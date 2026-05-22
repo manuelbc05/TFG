@@ -10,15 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentHomeBinding
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 import org.json.JSONArray
@@ -88,6 +89,7 @@ class HomeFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
     private fun cargarSpotsEnMapa() {
         db.collection("spots")
             .get()
@@ -107,7 +109,10 @@ class HomeFragment : Fragment() {
                         item.put("id", document.id)
                         item.put("lat", latitud)
                         item.put("lng", longitud)
-                        item.put("titulo", "${document.getString("marca") ?: "Coche"} ${document.getString("modelo") ?: ""}".trim())
+                        item.put(
+                            "titulo",
+                            "${document.getString("marca") ?: "Coche"} ${document.getString("modelo") ?: ""}".trim()
+                        )
                         array.put(item)
                     }
                 }
@@ -188,29 +193,77 @@ class HomeFragment : Fragment() {
         val dato = document.getString("dato") ?: "Sin descripción"
         val persona = document.getString("userEmail") ?: "Usuario desconocido"
         val fecha = formatearFecha(document.getTimestamp("createdAt"))
-        val imageBase64 = document.getString("imageBase64") ?: ""
+
+        val imagenesBase64 = obtenerImagenes(document)
+        var imagenActual = 0
 
         val contenedor = LinearLayout(context)
         contenedor.orientation = LinearLayout.VERTICAL
         contenedor.setPadding(36, 20, 36, 10)
 
-        val imageView = ImageView(context)
-        imageView.layoutParams = LinearLayout.LayoutParams(
+        val zonaFoto = FrameLayout(context)
+
+        zonaFoto.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             520
         )
+
+        val imageView = ImageView(context)
+        imageView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
-        if (imageBase64.isNotEmpty()) {
-            try {
-                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imageView.setImageBitmap(bitmap)
-            } catch (e: Exception) {
-                imageView.setImageResource(R.drawable.cochedesconocido)
+        ponerImagen(imageView, imagenesBase64.firstOrNull())
+
+        zonaFoto.addView(imageView)
+
+        if (imagenesBase64.size > 1) {
+            val flechaIzquierda = TextView(context)
+            flechaIzquierda.text = "‹"
+            flechaIzquierda.textSize = 56f
+            flechaIzquierda.gravity = Gravity.CENTER
+            flechaIzquierda.setPadding(20, 0, 20, 0)
+
+            val paramsIzquierda = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            paramsIzquierda.gravity = Gravity.CENTER_VERTICAL or Gravity.START
+
+            val flechaDerecha = TextView(context)
+            flechaDerecha.text = "›"
+            flechaDerecha.textSize = 56f
+            flechaDerecha.gravity = Gravity.CENTER
+            flechaDerecha.setPadding(20, 0, 20, 0)
+
+            val paramsDerecha = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            paramsDerecha.gravity = Gravity.CENTER_VERTICAL or Gravity.END
+
+            flechaIzquierda.setOnClickListener {
+                imagenActual--
+                if (imagenActual < 0) {
+                    imagenActual = imagenesBase64.size - 1
+                }
+
+                ponerImagen(imageView, imagenesBase64[imagenActual])
             }
-        } else {
-            imageView.setImageResource(R.drawable.cochedesconocido)
+
+            flechaDerecha.setOnClickListener {
+                imagenActual++
+                if (imagenActual >= imagenesBase64.size) {
+                    imagenActual = 0
+                }
+
+                ponerImagen(imageView, imagenesBase64[imagenActual])
+            }
+
+            zonaFoto.addView(flechaIzquierda, paramsIzquierda)
+            zonaFoto.addView(flechaDerecha, paramsDerecha)
         }
 
         val titulo = TextView(context)
@@ -236,7 +289,7 @@ class HomeFragment : Fragment() {
         descripcion.textSize = 15f
         descripcion.gravity = Gravity.CENTER
 
-        contenedor.addView(imageView)
+        contenedor.addView(zonaFoto)
         contenedor.addView(titulo)
         contenedor.addView(year)
         contenedor.addView(infoSpot)
@@ -247,6 +300,36 @@ class HomeFragment : Fragment() {
             .setView(contenedor)
             .setPositiveButton("Cerrar", null)
             .show()
+    }
+
+    private fun obtenerImagenes(document: DocumentSnapshot): List<String> {
+        val lista = document.get("imagenesBase64") as? List<String>
+
+        if (!lista.isNullOrEmpty()) {
+            return lista
+        }
+
+        val imagenPrincipal = document.getString("imageBase64") ?: ""
+
+        return if (imagenPrincipal.isNotEmpty()) {
+            listOf(imagenPrincipal)
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun ponerImagen(imageView: ImageView, imageBase64: String?) {
+        if (!imageBase64.isNullOrEmpty()) {
+            try {
+                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imageView.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                imageView.setImageResource(R.drawable.cochedesconocido)
+            }
+        } else {
+            imageView.setImageResource(R.drawable.cochedesconocido)
+        }
     }
 
     private fun formatearFecha(timestamp: Timestamp?): String {
