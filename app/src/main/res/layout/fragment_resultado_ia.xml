@@ -16,20 +16,20 @@
             android:id="@+id/btnPrev"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@android:drawable/ic_media_previous"/>
+            android:src="@android:drawable/ic_media_previous" />
 
         <ImageView
             android:id="@+id/imageCar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
         <ImageButton
             android:id="@+id/btnNextImage"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@android:drawable/ic_media_next"/>
+            android:src="@android:drawable/ic_media_next" />
 
     </LinearLayout>
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Marca"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/txtModelo"
@@ -53,7 +53,7 @@
             android:layout_weight="1"
             android:gravity="end"
             android:text="Modelo"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
     </LinearLayout>
 
@@ -61,10 +61,10 @@
         android:id="@+id/txtAnio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:layout_marginTop="10dp"
+        android:gravity="center"
         android:text="Año"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/txtDato"
@@ -72,13 +72,30 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:text="Dato curioso"/>
+        android:text="Dato curioso" />
+
+    <TextView
+        android:id="@+id/txtUbicacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="Ubicación no seleccionada"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btnSeleccionarUbicacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Seleccionar ubicación" />
 
     <Button
         android:id="@+id/btnPublicar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="Publicar"/>
+        android:layout_marginTop="24dp"
+        android:enabled="false"
+        android:text="Publicar" />
 
 </LinearLayout>

@@ -1,11 +1,15 @@
 package com.example.tfg
 
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 
 class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
 
@@ -31,6 +36,9 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
     private var modeloDetectado = ""
     private var anioDetectado = ""
     private var datoDetectado = ""
+
+    private var latitudSeleccionada: Double? = null
+    private var longitudSeleccionada: Double? = null
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance(
@@ -49,6 +57,9 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
             return
         }
 
+        binding.btnPublicar.isEnabled = false
+        binding.txtUbicacion.text = "Ubicación no seleccionada"
+
         mostrarImagenActual()
         analizarSoloPrimeraImagen()
 
@@ -66,6 +77,10 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                 mostrarImagenActual()
                 mostrarResultadoGuardado()
             }
+        }
+
+        binding.btnSeleccionarUbicacion.setOnClickListener {
+            abrirSelectorUbicacion()
         }
 
         binding.btnPublicar.setOnClickListener {
@@ -169,6 +184,114 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
         binding.txtDato.text = datoDetectado
     }
 
+    private fun abrirSelectorUbicacion() {
+        val webView = WebView(requireContext())
+
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.webViewClient = WebViewClient()
+
+        var dialog: AlertDialog? = null
+
+        webView.addJavascriptInterface(
+            object {
+                @JavascriptInterface
+                fun onLocationSelected(lat: Double, lng: Double) {
+                    requireActivity().runOnUiThread {
+                        latitudSeleccionada = lat
+                        longitudSeleccionada = lng
+
+                        binding.txtUbicacion.text = String.format(
+                            Locale.US,
+                            "Ubicación seleccionada: %.5f, %.5f",
+                            lat,
+                            lng
+                        )
+
+                        binding.btnPublicar.isEnabled = true
+                        dialog?.dismiss()
+                    }
+                }
+            },
+            "AndroidLocation"
+        )
+
+        val latInicial = latitudSeleccionada ?: 40.4168
+        val lngInicial = longitudSeleccionada ?: -3.7038
+
+        webView.loadDataWithBaseURL(
+            "https://unpkg.com/",
+            crearHtmlSelectorUbicacion(latInicial, lngInicial),
+            "text/html",
+            "UTF-8",
+            null
+        )
+
+        dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Selecciona la ubicación del spot")
+            .setMessage("Pulsa una vez sobre el mapa para poner la chincheta.")
+            .setView(webView)
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun crearHtmlSelectorUbicacion(latInicial: Double, lngInicial: Double): String {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+                <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+                <style>
+                    html, body, #mapid {
+                        width: 100%;
+                        height: 420px;
+                        margin: 0;
+                        padding: 0;
+                    }
+                </style>
+            </head>
+            <body>
+                <div id="mapid"></div>
+                <script>
+                    var map = L.map('mapid').setView([$latInicial, $lngInicial], 13);
+                    var marker = null;
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    function setMarker(lat, lng) {
+                        if (marker !== null) {
+                            map.removeLayer(marker);
+                        }
+
+                        marker = L.marker([lat, lng]).addTo(map);
+                        AndroidLocation.onLocationSelected(lat, lng);
+                    }
+
+                    map.on('click', function(e) {
+                        setMarker(e.latlng.lat, e.latlng.lng);
+                    });
+
+                    ${
+            if (latitudSeleccionada != null && longitudSeleccionada != null) {
+                "marker = L.marker([$latInicial, $lngInicial]).addTo(map);"
+            } else {
+                ""
+            }
+        }
+                </script>
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
     private fun publicarSpot() {
         val user = auth.currentUser
 
@@ -179,6 +302,15 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
 
         if (marcaDetectada.isEmpty() || modeloDetectado.isEmpty() || anioDetectado.isEmpty()) {
             Toast.makeText(requireContext(), "Espera a que termine el análisis", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val latitud = latitudSeleccionada
+        val longitud = longitudSeleccionada
+
+        if (latitud == null || longitud == null) {
+            Toast.makeText(requireContext(), "Selecciona una ubicación antes de publicar", Toast.LENGTH_SHORT).show()
+            binding.btnPublicar.isEnabled = false
             return
         }
 
@@ -198,6 +330,8 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                     "anio" to anioDetectado,
                     "dato" to datoDetectado,
                     "imageBase64" to imageBase64,
+                    "latitud" to latitud,
+                    "longitud" to longitud,
                     "createdAt" to FieldValue.serverTimestamp()
                 )
 
@@ -208,7 +342,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                             Toast.makeText(requireContext(), "Spot publicado", Toast.LENGTH_SHORT).show()
 
                             parentFragmentManager.beginTransaction()
-                                .replace(R.id.frameLayout, ProfileFragment())
+                                .replace(R.id.frameLayout, HomeFragment())
                                 .addToBackStack(null)
                                 .commit()
                         }
