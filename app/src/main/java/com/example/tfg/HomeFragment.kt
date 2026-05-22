@@ -18,6 +18,9 @@ import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentHomeBinding
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -170,6 +173,8 @@ class HomeFragment : Fragment() {
         val modelo = document.getString("modelo") ?: "Modelo no detectado"
         val anio = document.getString("anio") ?: "Año no detectado"
         val dato = document.getString("dato") ?: "Sin descripción"
+        val persona = document.getString("userEmail") ?: "Usuario desconocido"
+        val fecha = formatearFecha(document.getTimestamp("createdAt"))
         val imageBase64 = document.getString("imageBase64") ?: ""
 
         val contenedor = LinearLayout(context)
@@ -207,6 +212,12 @@ class HomeFragment : Fragment() {
         year.gravity = Gravity.CENTER
         year.setPadding(0, 0, 0, 18)
 
+        val infoSpot = TextView(context)
+        infoSpot.text = "Spoteado por: $persona\nFecha: $fecha"
+        infoSpot.textSize = 14f
+        infoSpot.gravity = Gravity.CENTER
+        infoSpot.setPadding(0, 0, 0, 18)
+
         val descripcion = TextView(context)
         descripcion.text = dato
         descripcion.textSize = 15f
@@ -215,6 +226,7 @@ class HomeFragment : Fragment() {
         contenedor.addView(imageView)
         contenedor.addView(titulo)
         contenedor.addView(year)
+        contenedor.addView(infoSpot)
         contenedor.addView(descripcion)
 
         AlertDialog.Builder(context)
@@ -222,5 +234,12 @@ class HomeFragment : Fragment() {
             .setView(contenedor)
             .setPositiveButton("Cerrar", null)
             .show()
+    }
+
+    private fun formatearFecha(timestamp: Timestamp?): String {
+        if (timestamp == null) return "Fecha no disponible"
+
+        val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return formato.format(timestamp.toDate())
     }
 }

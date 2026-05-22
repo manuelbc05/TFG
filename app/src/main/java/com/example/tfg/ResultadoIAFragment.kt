@@ -325,6 +325,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
                 val spot = hashMapOf(
                     "userId" to user.uid,
                     "userEmail" to user.email,
+                    "spottedBy" to (user.email ?: "Usuario desconocido"),
                     "marca" to marcaDetectada,
                     "modelo" to modeloDetectado,
                     "anio" to anioDetectado,

@@ -15,6 +15,9 @@ import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -139,6 +142,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                     val modelo = document.getString("modelo") ?: "Modelo"
                     val anio = document.getString("anio") ?: "Año"
                     val dato = document.getString("dato") ?: ""
+                    val fecha = formatearFecha(document.getTimestamp("createdAt"))
                     val imageBase64 = document.getString("imageBase64") ?: ""
 
                     crearCuadradoPublicacion(
@@ -146,6 +150,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         modelo = modelo,
                         anio = anio,
                         dato = dato,
+                        fecha = fecha,
                         imageBase64 = imageBase64
                     )
                 }
@@ -164,6 +169,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         modelo: String,
         anio: String,
         dato: String,
+        fecha: String,
         imageBase64: String
     ) {
         val context = requireContext()
@@ -221,6 +227,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 modelo = modelo,
                 anio = anio,
                 dato = dato,
+                fecha = fecha,
                 imageBase64 = imageBase64
             )
         }
@@ -233,6 +240,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         modelo: String,
         anio: String,
         dato: String,
+        fecha: String,
         imageBase64: String
     ) {
         val context = requireContext()
@@ -272,6 +280,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         year.gravity = Gravity.CENTER
         year.setPadding(0, 0, 0, 18)
 
+        val fechaSpot = TextView(context)
+        fechaSpot.text = "Fecha: $fecha"
+        fechaSpot.textSize = 14f
+        fechaSpot.gravity = Gravity.CENTER
+        fechaSpot.setPadding(0, 0, 0, 18)
+
         val descripcion = TextView(context)
         descripcion.text = if (dato.isNotBlank()) dato else "Sin descripción"
         descripcion.textSize = 15f
@@ -280,6 +294,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         contenedor.addView(imageView)
         contenedor.addView(titulo)
         contenedor.addView(year)
+        contenedor.addView(fechaSpot)
         contenedor.addView(descripcion)
 
         AlertDialog.Builder(context)
@@ -287,5 +302,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             .setView(contenedor)
             .setPositiveButton("Cerrar", null)
             .show()
+    }
+
+    private fun formatearFecha(timestamp: Timestamp?): String {
+        if (timestamp == null) return "Fecha no disponible"
+
+        val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return formato.format(timestamp.toDate())
     }
 }
