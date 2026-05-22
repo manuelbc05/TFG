@@ -1,5 +1,6 @@
 package com.example.tfg
 
+import android.app.AlertDialog
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
@@ -215,9 +216,76 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         card.addView(year)
 
         card.setOnClickListener {
-            Toast.makeText(context, dato, Toast.LENGTH_LONG).show()
+            mostrarDialogSpot(
+                marca = marca,
+                modelo = modelo,
+                anio = anio,
+                dato = dato,
+                imageBase64 = imageBase64
+            )
         }
 
         binding.postsGrid.addView(card)
+    }
+
+    private fun mostrarDialogSpot(
+        marca: String,
+        modelo: String,
+        anio: String,
+        dato: String,
+        imageBase64: String
+    ) {
+        val context = requireContext()
+
+        val contenedor = LinearLayout(context)
+        contenedor.orientation = LinearLayout.VERTICAL
+        contenedor.setPadding(36, 20, 36, 10)
+
+        val imageView = ImageView(context)
+        imageView.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            520
+        )
+        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+
+        if (imageBase64.isNotEmpty()) {
+            try {
+                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imageView.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                imageView.setImageResource(R.drawable.cochedesconocido)
+            }
+        } else {
+            imageView.setImageResource(R.drawable.cochedesconocido)
+        }
+
+        val titulo = TextView(context)
+        titulo.text = "$marca $modelo"
+        titulo.textSize = 22f
+        titulo.gravity = Gravity.CENTER
+        titulo.setPadding(0, 24, 0, 4)
+
+        val year = TextView(context)
+        year.text = anio
+        year.textSize = 18f
+        year.gravity = Gravity.CENTER
+        year.setPadding(0, 0, 0, 18)
+
+        val descripcion = TextView(context)
+        descripcion.text = if (dato.isNotBlank()) dato else "Sin descripción"
+        descripcion.textSize = 15f
+        descripcion.gravity = Gravity.CENTER
+
+        contenedor.addView(imageView)
+        contenedor.addView(titulo)
+        contenedor.addView(year)
+        contenedor.addView(descripcion)
+
+        AlertDialog.Builder(context)
+            .setTitle("Spot")
+            .setView(contenedor)
+            .setPositiveButton("Cerrar", null)
+            .show()
     }
 }
