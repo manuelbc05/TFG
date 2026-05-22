@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Base64
 import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -13,9 +14,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentProfileBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -132,27 +134,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             .whereEqualTo("userId", user.uid)
             .get()
             .addOnSuccessListener { documents ->
-
                 binding.postsGrid.removeAllViews()
-
                 binding.postsTitle.text = "Publicaciones (${documents.size()})"
 
                 for (document in documents) {
-                    val marca = document.getString("marca") ?: "Marca"
-                    val modelo = document.getString("modelo") ?: "Modelo"
-                    val anio = document.getString("anio") ?: "Año"
-                    val dato = document.getString("dato") ?: ""
-                    val fecha = formatearFecha(document.getTimestamp("createdAt"))
-                    val imageBase64 = document.getString("imageBase64") ?: ""
-
-                    crearCuadradoPublicacion(
-                        marca = marca,
-                        modelo = modelo,
-                        anio = anio,
-                        dato = dato,
-                        fecha = fecha,
-                        imageBase64 = imageBase64
-                    )
+                    crearCuadradoPublicacion(document)
                 }
             }
             .addOnFailureListener { e ->
@@ -164,15 +150,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             }
     }
 
-    private fun crearCuadradoPublicacion(
-        marca: String,
-        modelo: String,
-        anio: String,
-        dato: String,
-        fecha: String,
-        imageBase64: String
-    ) {
+    private fun crearCuadradoPublicacion(document: DocumentSnapshot) {
         val context = requireContext()
+
+        val marca = document.getString("marca") ?: "Marca"
+        val modelo = document.getString("modelo") ?: "Modelo"
+        val anio = document.getString("anio") ?: "Año"
+
+        val imagenesBase64 = obtenerImagenes(document)
+        val imageBase64 = imagenesBase64.firstOrNull().orEmpty()
 
         val card = LinearLayout(context)
         card.orientation = LinearLayout.VERTICAL
@@ -193,17 +179,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         )
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
-        if (imageBase64.isNotEmpty()) {
-            try {
-                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imageView.setImageBitmap(bitmap)
-            } catch (e: Exception) {
-                imageView.setImageResource(R.drawable.cochedesconocido)
-            }
-        } else {
-            imageView.setImageResource(R.drawable.cochedesconocido)
-        }
+        ponerImagen(imageView, imageBase64)
 
         val titulo = TextView(context)
         titulo.text = "$marca $modelo"
@@ -222,50 +198,90 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         card.addView(year)
 
         card.setOnClickListener {
-            mostrarDialogSpot(
-                marca = marca,
-                modelo = modelo,
-                anio = anio,
-                dato = dato,
-                fecha = fecha,
-                imageBase64 = imageBase64
-            )
+            mostrarDialogSpot(document)
         }
 
         binding.postsGrid.addView(card)
     }
 
-    private fun mostrarDialogSpot(
-        marca: String,
-        modelo: String,
-        anio: String,
-        dato: String,
-        fecha: String,
-        imageBase64: String
-    ) {
+    private fun mostrarDialogSpot(document: DocumentSnapshot) {
         val context = requireContext()
+
+        val marca = document.getString("marca") ?: "Marca no detectada"
+        val modelo = document.getString("modelo") ?: "Modelo no detectado"
+        val anio = document.getString("anio") ?: "Año no detectado"
+        val dato = document.getString("dato") ?: "Sin descripción"
+        val fecha = formatearFecha(document.getTimestamp("createdAt"))
+
+        val imagenesBase64 = obtenerImagenes(document)
+        var imagenActual = 0
 
         val contenedor = LinearLayout(context)
         contenedor.orientation = LinearLayout.VERTICAL
         contenedor.setPadding(36, 20, 36, 10)
 
-        val imageView = ImageView(context)
-        imageView.layoutParams = LinearLayout.LayoutParams(
+        val zonaFoto = FrameLayout(context)
+        zonaFoto.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             520
         )
+
+        val imageView = ImageView(context)
+        imageView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
-        if (imageBase64.isNotEmpty()) {
-            try {
-                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imageView.setImageBitmap(bitmap)
-            } catch (e: Exception) {
-                imageView.setImageResource(R.drawable.cochedesconocido)
+        ponerImagen(imageView, imagenesBase64.firstOrNull())
+
+        zonaFoto.addView(imageView)
+
+        if (imagenesBase64.size > 1) {
+            val flechaIzquierda = TextView(context)
+            flechaIzquierda.text = "‹"
+            flechaIzquierda.textSize = 56f
+            flechaIzquierda.gravity = Gravity.CENTER
+            flechaIzquierda.setPadding(20, 0, 20, 0)
+
+            val paramsIzquierda = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            paramsIzquierda.gravity = Gravity.CENTER_VERTICAL or Gravity.START
+
+            val flechaDerecha = TextView(context)
+            flechaDerecha.text = "›"
+            flechaDerecha.textSize = 56f
+            flechaDerecha.gravity = Gravity.CENTER
+            flechaDerecha.setPadding(20, 0, 20, 0)
+
+            val paramsDerecha = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            paramsDerecha.gravity = Gravity.CENTER_VERTICAL or Gravity.END
+
+            flechaIzquierda.setOnClickListener {
+                imagenActual--
+                if (imagenActual < 0) {
+                    imagenActual = imagenesBase64.size - 1
+                }
+
+                ponerImagen(imageView, imagenesBase64[imagenActual])
             }
-        } else {
-            imageView.setImageResource(R.drawable.cochedesconocido)
+
+            flechaDerecha.setOnClickListener {
+                imagenActual++
+                if (imagenActual >= imagenesBase64.size) {
+                    imagenActual = 0
+                }
+
+                ponerImagen(imageView, imagenesBase64[imagenActual])
+            }
+
+            zonaFoto.addView(flechaIzquierda, paramsIzquierda)
+            zonaFoto.addView(flechaDerecha, paramsDerecha)
         }
 
         val titulo = TextView(context)
@@ -291,7 +307,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         descripcion.textSize = 15f
         descripcion.gravity = Gravity.CENTER
 
-        contenedor.addView(imageView)
+        contenedor.addView(zonaFoto)
         contenedor.addView(titulo)
         contenedor.addView(year)
         contenedor.addView(fechaSpot)
@@ -302,6 +318,36 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             .setView(contenedor)
             .setPositiveButton("Cerrar", null)
             .show()
+    }
+
+    private fun obtenerImagenes(document: DocumentSnapshot): List<String> {
+        val lista = document.get("imagenesBase64") as? List<String>
+
+        if (!lista.isNullOrEmpty()) {
+            return lista
+        }
+
+        val imagenPrincipal = document.getString("imageBase64") ?: ""
+
+        return if (imagenPrincipal.isNotEmpty()) {
+            listOf(imagenPrincipal)
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun ponerImagen(imageView: ImageView, imageBase64: String?) {
+        if (!imageBase64.isNullOrEmpty()) {
+            try {
+                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imageView.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                imageView.setImageResource(R.drawable.cochedesconocido)
+            }
+        } else {
+            imageView.setImageResource(R.drawable.cochedesconocido)
+        }
     }
 
     private fun formatearFecha(timestamp: Timestamp?): String {
