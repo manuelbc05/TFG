@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.tfg.databinding.FragmentHomeBinding
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -69,6 +70,17 @@ class HomeFragment : Fragment() {
         webView.loadUrl("file:///android_asset/map.html")
 
         binding.btnAction.setOnClickListener {
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                Toast.makeText(requireContext(), "Necesitas una cuenta para esto", Toast.LENGTH_SHORT).show()
+
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.frameLayout, ProfileFragment())
+                    .addToBackStack(null)
+                    .commit()
+
+                return@setOnClickListener
+            }
+
             val bottomSheet = UploadSpotBottomSheet()
             bottomSheet.show(parentFragmentManager, "UploadSpot")
         }

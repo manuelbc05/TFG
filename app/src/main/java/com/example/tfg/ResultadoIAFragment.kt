@@ -51,6 +51,17 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
 
         binding = FragmentResultadoIaBinding.bind(view)
 
+        if (auth.currentUser == null) {
+            Toast.makeText(requireContext(), "Necesitas una cuenta para esto", Toast.LENGTH_SHORT).show()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frameLayout, ProfileFragment())
+                .addToBackStack(null)
+                .commit()
+
+            return
+        }
+
         if (imagenes.isEmpty()) {
             Toast.makeText(requireContext(), "No hay imágenes seleccionadas", Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
@@ -296,7 +307,7 @@ class ResultadoIAFragment : Fragment(R.layout.fragment_resultado_ia) {
         val user = auth.currentUser
 
         if (user == null) {
-            Toast.makeText(requireContext(), "Debes iniciar sesión para publicar", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Necesitas una cuenta para esto", Toast.LENGTH_SHORT).show()
             return
         }
 
