@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FCF6FF"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingLeft="22dp"
+        android:paddingTop="42dp"
+        android:paddingRight="22dp"
+        android:paddingBottom="120dp">
 
         <TextView
             android:id="@+id/profileTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="No has iniciado sesión"
-            android:textSize="18sp" />
+            android:textColor="#222222"
+            android:textSize="26sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
             android:hint="Correo electrónico"
             android:inputType="textEmailAddress" />
 
@@ -28,44 +35,66 @@
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:hint="Contraseña"
             android:inputType="textPassword" />
 
         <Button
             android:id="@+id/loginButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Iniciar sesión" />
+            android:layout_height="54dp"
+            android:layout_marginTop="18dp"
+            android:backgroundTint="#6B4CB3"
+            android:text="Iniciar sesión"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Registrarse" />
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#6B4CB3"
+            android:text="Registrarse"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="54dp"
+            android:layout_marginTop="34dp"
+            android:backgroundTint="#6B4CB3"
             android:text="Cerrar sesión"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/postsTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="Publicaciones"
-            android:textSize="20sp"
+            android:layout_marginTop="150dp"
+            android:text="Spots"
+            android:textColor="#222222"
+            android:textSize="28sp"
             android:textStyle="bold"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/postsDivider"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginBottom="34dp"
+            android:background="#000000"
             android:visibility="gone" />
 
         <GridLayout
             android:id="@+id/postsGrid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:columnCount="3"
+            android:columnCount="2"
             android:visibility="gone" />
 
     </LinearLayout>

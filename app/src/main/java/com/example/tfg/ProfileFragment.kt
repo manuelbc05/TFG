@@ -67,6 +67,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             binding.passwordEditText.visibility = View.GONE
 
             binding.postsTitle.visibility = View.VISIBLE
+            binding.postsDivider.visibility = View.VISIBLE
             binding.postsGrid.visibility = View.VISIBLE
 
             cargarPublicaciones()
@@ -81,6 +82,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             binding.passwordEditText.visibility = View.VISIBLE
 
             binding.postsTitle.visibility = View.GONE
+            binding.postsDivider.visibility = View.GONE
             binding.postsGrid.visibility = View.GONE
             binding.postsGrid.removeAllViews()
         }
@@ -128,14 +130,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val user = auth.currentUser ?: return
 
         binding.postsGrid.removeAllViews()
-        binding.postsTitle.text = "Publicaciones"
+        binding.postsTitle.text = "Spots"
 
         db.collection("spots")
             .whereEqualTo("userId", user.uid)
             .get()
             .addOnSuccessListener { documents ->
                 binding.postsGrid.removeAllViews()
-                binding.postsTitle.text = "Publicaciones (${documents.size()})"
 
                 for (document in documents) {
                     crearCuadradoPublicacion(document)
@@ -163,13 +164,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val card = LinearLayout(context)
         card.orientation = LinearLayout.VERTICAL
         card.gravity = Gravity.CENTER
-        card.setPadding(6, 6, 6, 6)
+        card.setPadding(10, 0, 10, 34)
 
-        val size = resources.displayMetrics.widthPixels / 3
+        val screenWidth = resources.displayMetrics.widthPixels
+        val size = (screenWidth - 74) / 2
 
         val cardParams = GridLayout.LayoutParams()
         cardParams.width = size
         cardParams.height = GridLayout.LayoutParams.WRAP_CONTENT
+        cardParams.setMargins(0, 0, 0, 0)
         card.layoutParams = cardParams
 
         val imageView = ImageView(context)
@@ -183,13 +186,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         val titulo = TextView(context)
         titulo.text = "$marca $modelo"
-        titulo.textSize = 12f
+        titulo.textSize = 16f
         titulo.gravity = Gravity.CENTER
         titulo.maxLines = 1
+        titulo.setPadding(0, 10, 0, 0)
 
         val year = TextView(context)
         year.text = anio
-        year.textSize = 11f
+        year.textSize = 16f
         year.gravity = Gravity.CENTER
         year.maxLines = 1
 
